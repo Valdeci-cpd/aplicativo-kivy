@@ -1,11 +1,22 @@
 #:kivy 2.3.1
 
-<BoxLayout>:
-    canvas.after:
-        Color:
-            rgba: (1, 0, 0, 1)
-        Line:
-            rectangle: (*self.pos, *self.size)
+<Label>:
+    font_name: "Roboto"
+
+<Button>:
+    font_name: "Roboto"
+
+<TextInput>:
+    font_name: "Roboto"
+
+<Spinner>:
+    font_name: "Roboto"
+
+<SpinnerOption>:
+    font_name: "Roboto"
+
+<Popup>:
+    title_font: "Roboto"
 
 <CardClientesScreen>:
     name: "list"

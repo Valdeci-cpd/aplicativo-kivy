@@ -24,6 +24,8 @@ KV_FILE = "app.kv"
 DB_NAME = "base.db"
 DB_REMOTE_URL = "https://github.com/Valdeci-cpd/Contratos/raw/refs/heads/main/base.db"
 
+Clock.max_iteration = 20
+
 def parse_date(s: str):
     if not s:
         return None

@@ -12,7 +12,7 @@
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(12)
+        padding: [dp(12), 0, dp(12), dp(12)]
         spacing: dp(12)
         canvas.before:
             Color:
@@ -24,6 +24,7 @@
         BoxLayout:
             orientation: "vertical"
             size_hint_y: None
+            height: self.minimum_height
             spacing: dp(6)
             padding: [0, dp(2)]
             BoxLayout:
@@ -46,7 +47,7 @@
                     color: (1, 1, 1, 1)
             TextInput:
                 id: search_in
-                hint_text: "Buscar"
+                hint_text: "Busque"
                 text: root.search_text
                 multiline: False
                 on_text: root.on_search_text(self, self.text)
@@ -229,7 +230,7 @@
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(12)
+        padding: [dp(12), 0, dp(12), dp(12)]
         spacing: dp(12)
         canvas.before:
             Color:
@@ -241,6 +242,7 @@
         BoxLayout:
             orientation: "vertical"
             size_hint_y: None
+            height: self.minimum_height
             spacing: dp(6)
             padding: [0, dp(2)]
             BoxLayout:
@@ -256,8 +258,8 @@
                 Button:
                     text: "Voltar"
                     size_hint: None, None
-                    width: dp(110)
-                    height: dp(36)
+                    width: dp(48)
+                    height: dp(28)
                     on_release: root.voltar()
                     background_color: (0.2, 0.5, 0.9, 1)
                     color: (1, 1, 1, 1)
@@ -486,7 +488,7 @@
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(12)
+        padding: [dp(12), 0, dp(12), dp(12)]
         spacing: dp(12)
         canvas.before:
             Color:
@@ -498,6 +500,7 @@
         BoxLayout:
             orientation: "vertical"
             size_hint_y: None
+            height: self.minimum_height
             spacing: dp(6)
             padding: [0, dp(2)]
             BoxLayout:
@@ -513,8 +516,8 @@
                 Button:
                     text: "Voltar"
                     size_hint: None, None
-                    width: dp(110)
-                    height: dp(36)
+                    width: dp(48)
+                    height: dp(28)
                     on_release: root.voltar()
                     background_color: (0.2, 0.5, 0.9, 1)
                     color: (1, 1, 1, 1)
@@ -682,7 +685,7 @@
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(12)
+        padding: [dp(12), 0, dp(12), dp(12)]
         spacing: dp(12)
         canvas.before:
             Color:
@@ -694,6 +697,7 @@
         BoxLayout:
             orientation: "vertical"
             size_hint_y: None
+            height: self.minimum_height
             spacing: dp(6)
             padding: [0, dp(2)]
             BoxLayout:
@@ -728,6 +732,8 @@
                     on_release: root.clear_filters()
                     background_color: (0.2, 0.5, 0.9, 1)
                     color: (1, 1, 1, 1)
+                Widget:
+                    size_hint_x: 1
                 Button:
                     text: "Voltar"
                     size_hint: None, None

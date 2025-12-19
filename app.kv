@@ -1,0 +1,837 @@
+#:kivy 2.3.1
+
+<BoxLayout>:
+    canvas.after:
+        Color:
+            rgba: (1, 0, 0, 1)
+        Line:
+            rectangle: (*self.pos, *self.size)
+
+<CardClientesScreen>:
+    name: "list"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(12)
+        spacing: dp(12)
+        canvas.before:
+            Color:
+                rgba: (0.07, 0.09, 0.13, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            spacing: dp(6)
+            padding: [0, dp(2)]
+            BoxLayout:
+                size_hint_y: None
+                height: dp(28)
+                Label:
+                    text: "Buscar por cliente, cidade, vendedor ou pasta"
+                    font_size: "15sp"
+                    color: (1, 1, 1, 0.7)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                Button:
+                    text: "..."
+                    size_hint: None, None
+                    width: dp(48)
+                    height: dp(28)
+                    on_release: root.open_actions_menu()
+                    background_color: (0.2, 0.5, 0.9, 1)
+                    color: (1, 1, 1, 1)
+            TextInput:
+                id: search_in
+                hint_text: "Buscar"
+                text: root.search_text
+                multiline: False
+                on_text: root.on_search_text(self, self.text)
+                on_text_validate: root.on_search_validate(self.text)
+                write_tab: False
+                padding: [dp(10), dp(12)]
+                size_hint_y: None
+                height: dp(48)
+                background_normal: ""
+                background_color: (0.1, 0.12, 0.18, 1)
+                foreground_color: (1, 1, 1, 1)
+                cursor_color: (0.6, 0.8, 1, 1)
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(30)
+            Label:
+                text: "Clientes"
+                font_size: "15sp"
+                color: (1, 1, 1, 0.7)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(6)
+            canvas.before:
+                Color:
+                    rgba: (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(14)]
+
+            RecycleView:
+                id: rv
+                viewclass: "ContractRow"
+                data: root.rv_data
+                bar_color: (0.4, 0.6, 0.9, 1)
+                bar_width: dp(3)
+
+                RecycleBoxLayout:
+                    default_size: None, dp(160)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: "vertical"
+                    spacing: dp(10)
+
+<ContractRow@ButtonBehavior+BoxLayout>:
+    codigo_cliente: ""
+    nome_fantasia: ""
+    razao_social: ""
+    cidade: ""
+    vendedor: ""
+    supervisor: ""
+    pasta: ""
+    qtd_contratos: ""
+    contratos: []
+
+    orientation: "vertical"
+    size_hint_y: None
+    padding: dp(14)
+    spacing: dp(10)
+    height: dp(160)
+    canvas.before:
+        Color:
+            rgba: (0.18, 0.2, 0.26, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+        Color:
+            rgba: (1, 1, 1, 0.08)
+        Line:
+            rounded_rectangle: (*self.pos, *self.size, dp(12))
+
+    on_release:
+        app.root.get_screen("list").open_detail(self.codigo_cliente)
+
+    BoxLayout:
+        orientation: "horizontal"
+        spacing: dp(12)
+        size_hint_y: None
+        height: dp(92)
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: dp(4)
+            Label:
+                text: f"[b]Código:[/b] {root.codigo_cliente}"
+                markup: True
+                halign: "left"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+            Label:
+                text: f"[b]Nome Fantasia:[/b] {root.nome_fantasia}"
+                markup: True
+                halign: "left"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+            Label:
+                text: f"[b]Razão Social:[/b] {root.razao_social}"
+                markup: True
+                halign: "left"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+            Label:
+                text: f"[b]Cidade:[/b] {root.cidade}"
+                markup: True
+                halign: "left"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_x: None
+            width: dp(130)
+            canvas.before:
+                Color:
+                    rgba: (0.27, 0.52, 0.95, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(10)]
+            padding: dp(8)
+            spacing: dp(4)
+            Label:
+                text: "Nº Contratos"
+                font_size: "12sp"
+                color: (1, 1, 1, 0.85)
+                halign: "center"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: dp(28)
+            Label:
+                text: root.qtd_contratos
+                font_size: "26sp"
+                bold: True
+                halign: "center"
+                valign: "middle"
+                text_size: self.size
+
+    BoxLayout:
+        orientation: "horizontal"
+        spacing: dp(8)
+        size_hint_y: None
+        height: dp(26)
+        Label:
+            text: f"[b]Supervisor:[/b] {root.supervisor}"
+            markup: True
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+        Label:
+            text: f"[b]Vendedor:[/b] {root.vendedor}"
+            markup: True
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+        Label:
+            text: f"[b]Pasta:[/b] {root.pasta}"
+            markup: True
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+
+<ContractDetailScreen>:
+    name: "detail"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(12)
+        spacing: dp(12)
+        canvas.before:
+            Color:
+                rgba: (0.07, 0.09, 0.13, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            spacing: dp(6)
+            padding: [0, dp(2)]
+            BoxLayout:
+                size_hint_y: None
+                height: dp(28)
+                Label:
+                    text: "Detalhes"
+                    font_size: "15sp"
+                    color: (1, 1, 1, 0.7)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                Button:
+                    text: "Voltar"
+                    size_hint: None, None
+                    width: dp(110)
+                    height: dp(36)
+                    on_release: root.voltar()
+                    background_color: (0.2, 0.5, 0.9, 1)
+                    color: (1, 1, 1, 1)
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(30)
+            Label:
+                text: "Dados do Cliente"
+                font_size: "15sp"
+                color: (1, 1, 1, 0.7)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(6)
+            size_hint_y: None
+            height: self.minimum_height
+            canvas.before:
+                Color:
+                    rgba: (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(14)]
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(14)
+                spacing: dp(8)
+                canvas.before:
+                    Color:
+                        rgba: (0.13, 0.15, 0.2, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(14)]
+                Label:
+                    text: f"[b]Código:[/b] {root.codigo_cliente}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Nome Fantasia:[/b] {root.nome_fantasia}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Razão Social:[/b] {root.razao_social}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Cidade:[/b] {root.cidade}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Supervisor:[/b] {root.supervisor}   [b]Vendedor:[/b] {root.vendedor}   [b]Pasta:[/b] {root.pasta}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(30)
+            Label:
+                text: "Contratos"
+                font_size: "15sp"
+                color: (1, 1, 1, 0.7)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(6)
+            canvas.before:
+                Color:
+                    rgba: (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(14)]
+
+            RecycleView:
+                id: contratos_rv
+                viewclass: "ContratoButton"
+                data: root.contratos_detalhes
+                bar_color: (0.4, 0.6, 0.9, 1)
+                bar_width: dp(3)
+
+                RecycleBoxLayout:
+                    default_size: None, dp(84)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: "vertical"
+                    spacing: dp(10)
+
+<ProdutoRow@BoxLayout>:
+    id_produto: 0
+    codigo_produto: ""
+    descricao: ""
+    quantidade: 0
+
+    size_hint_y: None
+    height: dp(64)
+    padding: dp(10)
+    spacing: dp(6)
+    canvas.before:
+        Color:
+            rgba: (0.15, 0.15, 0.15, 0.06)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10)]
+
+    BoxLayout:
+        orientation: "vertical"
+        spacing: dp(4)
+        Label:
+            text: f"[b]{root.descricao}[/b]"
+            markup: True
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+        Label:
+            text: f"Código do Produto: {root.codigo_produto}    Quantidade: {root.quantidade}"
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+
+<ContratoButton@ButtonBehavior+BoxLayout>:
+    numero_contrato: ""
+    emissao: ""
+    vencimento: ""
+    tipo: ""
+
+    size_hint_y: None
+    height: dp(90)
+    padding: dp(12)
+    spacing: dp(8)
+    canvas.before:
+        Color:
+            rgba: (0.18, 0.2, 0.26, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(10)]
+
+    on_release:
+        app.root.get_screen("detail").open_products(self.numero_contrato)
+
+    BoxLayout:
+        orientation: "vertical"
+        spacing: dp(6)
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: self.minimum_height
+
+            Label:
+                text: f"[b]CONTRATO Nº {root.numero_contrato}[/b]"
+                markup: True
+                halign: "left"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+
+            Label:
+                text: f"Tipo: {root.tipo}"
+                halign: "right"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(10)
+
+            Label:
+                text: f"EMISSAO: {root.emissao}"
+                halign: "left"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+
+            Label:
+                text: f"VENCIMENTO: {root.vencimento}"
+                halign: "right"
+                valign: "middle"
+                text_size: (self.width, None)
+                size_hint_y: None
+                height: self.texture_size[1] + dp(4)
+
+<ProductContractScreen>:
+    name: "products"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(12)
+        spacing: dp(12)
+        canvas.before:
+            Color:
+                rgba: (0.07, 0.09, 0.13, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            spacing: dp(6)
+            padding: [0, dp(2)]
+            BoxLayout:
+                size_hint_y: None
+                height: dp(28)
+                Label:
+                    text: "Detalhes do Contrato"
+                    font_size: "15sp"
+                    color: (1, 1, 1, 0.7)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                Button:
+                    text: "Voltar"
+                    size_hint: None, None
+                    width: dp(110)
+                    height: dp(36)
+                    on_release: root.voltar()
+                    background_color: (0.2, 0.5, 0.9, 1)
+                    color: (1, 1, 1, 1)
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(30)
+            Label:
+                text: "Dados do Contrato"
+                font_size: "15sp"
+                color: (1, 1, 1, 0.7)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(6)
+            size_hint_y: None
+            height: self.minimum_height
+            canvas.before:
+                Color:
+                    rgba: (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(14)]
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(14)
+                spacing: dp(8)
+                canvas.before:
+                    Color:
+                        rgba: (0.13, 0.15, 0.2, 1)
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(14)]
+                Label:
+                    text: f"[b]CONTRATO Nº {root.numero_contrato}[/b]"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Cliente:[/b] {root.codigo_cliente} {root.nome_fantasia}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Emissao:[/b] {root.emissao}  |  [b]Vencimento:[/b] {root.vencimento}  |  [b]Tipo:[/b] {root.tipo}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(30)
+            Label:
+                text: "Produtos"
+                font_size: "15sp"
+                color: (1, 1, 1, 0.7)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(6)
+            canvas.before:
+                Color:
+                    rgba: (0.11, 0.12, 0.16, 1)
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(14)]
+
+            RecycleView:
+                id: produtos_rv
+                viewclass: "ProductoDetalheCard"
+                data: root.produtos
+                bar_color: (0.4, 0.6, 0.9, 1)
+                bar_width: dp(3)
+
+                RecycleBoxLayout:
+                    default_size: None, dp(110)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: "vertical"
+                    spacing: dp(10)
+
+<ProductoDetalheCard@BoxLayout>:
+    id_produto: 0
+    codigo_produto: ""
+    descricao: ""
+    quantidade: 0
+
+    orientation: "vertical"
+    size_hint_y: None
+    height: dp(110)
+    padding: dp(14)
+    spacing: dp(8)
+    canvas.before:
+        Color:
+            rgba: (0.18, 0.2, 0.26, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(12)]
+        Color:
+            rgba: (1, 1, 1, 0.08)
+        Line:
+            rounded_rectangle: (*self.pos, *self.size, dp(12))
+
+    Label:
+        text: f"[b]{root.descricao}[/b]"
+        markup: True
+        font_size: "15sp"
+        halign: "left"
+        valign: "top"
+        text_size: (self.width, None)
+        size_hint_y: None
+        height: self.texture_size[1] + dp(4)
+
+    BoxLayout:
+        orientation: "horizontal"
+        spacing: dp(20)
+        size_hint_y: None
+        height: self.minimum_height
+
+        Label:
+            text: f"[b]Codigo:[/b] {root.codigo_produto}"
+            markup: True
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+            size_hint_y: None
+            height: self.texture_size[1] + dp(4)
+
+        Label:
+            text: f"[b]Quantidade:[/b] {root.quantidade}"
+            markup: True
+            halign: "left"
+            valign: "middle"
+            text_size: (self.width, None)
+            size_hint_y: None
+            height: self.texture_size[1] + dp(4)
+
+<AdvancedFilterScreen>:
+    name: "advanced_filter"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(12)
+        spacing: dp(12)
+        canvas.before:
+            Color:
+                rgba: (0.07, 0.09, 0.13, 1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            spacing: dp(6)
+            padding: [0, dp(2)]
+            BoxLayout:
+                size_hint_y: None
+                height: dp(28)
+                Label:
+                    text: "Filtro"
+                    font_size: "15sp"
+                    color: (1, 1, 1, 0.7)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+            BoxLayout:
+                size_hint_y: None
+                height: dp(36)
+                spacing: dp(8)
+
+                Button:
+                    text: "Aplicar"
+                    size_hint: None, None
+                    width: dp(110)
+                    height: dp(36)
+                    on_release: root.apply_filters()
+                    background_color: (0.2, 0.5, 0.9, 1)
+                    color: (1, 1, 1, 1)
+
+                Button:
+                    text: "Limpar"
+                    size_hint: None, None
+                    width: dp(110)
+                    height: dp(36)
+                    on_release: root.clear_filters()
+                    background_color: (0.2, 0.5, 0.9, 1)
+                    color: (1, 1, 1, 1)
+                Button:
+                    text: "Voltar"
+                    size_hint: None, None
+                    width: dp(110)
+                    height: dp(36)
+                    on_release: root.voltar()
+                    background_color: (0.2, 0.5, 0.9, 1)
+                    color: (1, 1, 1, 1)
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(30)
+            Label:
+                text: "Filtrar por"
+                font_size: "15sp"
+                color: (1, 1, 1, 0.7)
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        ScrollView:
+            do_scroll_x: False
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(12)
+
+                BoxLayout:
+                    orientation: "vertical"
+                    padding: dp(6)
+                    spacing: dp(12)
+                    size_hint_y: None
+                    height: self.minimum_height
+                    canvas.before:
+                        Color:
+                            rgba: (0.11, 0.12, 0.16, 1)
+                        RoundedRectangle:
+                            pos: self.pos
+                            size: self.size
+                            radius: [dp(14)]
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: dp(14)
+                        spacing: dp(8)
+                        canvas.before:
+                            Color:
+                                rgba: (0.13, 0.15, 0.2, 1)
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(14)]
+                        Label:
+                            text: "Selecione o Vendedor"
+                            bold: True
+                            size_hint_y: None
+                            height: self.texture_size[1] + dp(4)
+                            halign: "left"
+                            valign: "middle"
+                            text_size: (self.width, None)
+                        Spinner:
+                            id: vendedor_spinner
+                            text: root.selected_vendedor if root.selected_vendedor else "Todos"
+                            values: (["Todos"] + root.vendedores) if root.vendedores else ["Todos"]
+                            size_hint_y: None
+                            height: dp(48)
+                            on_text: root.on_select_vendedor(self.text)
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: dp(14)
+                        spacing: dp(8)
+                        canvas.before:
+                            Color:
+                                rgba: (0.13, 0.15, 0.2, 1)
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(14)]
+                        Label:
+                            text: "Selecione a Rota"
+                            bold: True
+                            size_hint_y: None
+                            height: self.texture_size[1] + dp(4)
+                            halign: "left"
+                            valign: "middle"
+                            text_size: (self.width, None)
+                        GridLayout:
+                            id: pastas_box
+                            cols: 1
+                            size_hint_y: None
+                            spacing: dp(8)
+                            padding: dp(2)
+                            height: self.minimum_height
+
+<RootSM>:
+    CardClientesScreen:
+    ContractDetailScreen:
+    ProductContractScreen:
+    AdvancedFilterScreen:

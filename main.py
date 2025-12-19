@@ -29,23 +29,39 @@ def parse_date(s: str):
         return None
     if isinstance(s, date):
         return s
-    try:
-        return datetime.strptime(s, "%d/%m/%Y").date()
-    except ValueError:
-        return None
+    if isinstance(s, str):
+        s = s.strip()
+        if "T" in s:
+            s = s.split("T", 1)[0]
+        if " " in s:
+            s = s.split(" ", 1)[0]
+    for fmt in ("%m/%d/%Y", "%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    return None
 
 def format_date(s: str) -> str:
     if not s:
         return ""
     if isinstance(s, date):
-        return s.strftime("%d/%m/%Y")
+        return s.strftime("%m/%d/%Y")
     try:
         d = parse_date(s)
         if d:
-            return d.strftime("%d/%m/%Y")
+            return d.strftime("%m/%d/%Y")
     except Exception:
         pass
     return str(s)
+
+def normalize_tipo(value: str) -> str:
+    tipo_upper = str(value or "").strip().upper()
+    if "FIXO" in tipo_upper:
+        return "FIXO"
+    if "PROVIS" in tipo_upper:
+        return "PROVISÓRIO"
+    return tipo_upper
 
 def ensure_db_available() -> str:
     app = App.get_running_app()
@@ -360,7 +376,7 @@ class CardClientesScreen(Screen):
         message = (
             "Comodato Viewer\n"
             "Versão 1.0\n"
-            "Aplicativo para consulta rápida de contratos de comodatos.\n\n"
+            "Aplicativo para consulta rápida de contratos de comodatos."
         )
         self.show_message("Sobre", message)
 
@@ -419,11 +435,21 @@ class CardClientesScreen(Screen):
         for numero_contrato in contratos:
             detail = app.db.get_contract_detail(numero_contrato)
             if detail:
+                tipo_display = normalize_tipo(detail.get("tipo", ""))
+                if "FIXO" in tipo_display:
+                    tipo_color = [0.18, 0.8, 0.44, 1]
+                elif "PROVIS" in tipo_display:
+                    tipo_color = [0.95, 0.6, 0.07, 1]
+                else:
+                    tipo_color = [0.5, 0.5, 0.5, 1]
                 detalhes.append({
                     "numero_contrato": str(detail.get("numero_contrato", "")),
                     "emissao": format_date(detail.get("emissao", "")),
                     "vencimento": format_date(detail.get("vencimento", "")),
                     "tipo": str(detail.get("tipo", "")),
+                    "tipo_label": tipo_display,
+                    "tipo_display": tipo_display,
+                    "tipo_color": tipo_color,
                 })
         # Passar para a tela de detalhes
         app.root.get_screen("detail").set_data(cliente_info, detalhes)
@@ -448,7 +474,28 @@ class ContractDetailScreen(Screen):
         self.vendedor = str(cliente_info.get("vendedor", "") or "")
         self.supervisor = str(cliente_info.get("supervisor", "") or "")
         self.pasta = str(cliente_info.get("pasta", "") or "")
-        self.contratos_detalhes = detalhes
+        formatted = []
+        for item in detalhes or []:
+            data = dict(item)
+            data["emissao"] = format_date(data.get("emissao", ""))
+            data["vencimento"] = format_date(data.get("vencimento", ""))
+            if not data.get("tipo_label"):
+                data["tipo_label"] = normalize_tipo(data.get("tipo", ""))
+            if not data.get("tipo_display"):
+                data["tipo_display"] = normalize_tipo(data.get("tipo_label", data.get("tipo", "")))
+            if not data.get("tipo_color"):
+                tipo_upper = data.get("tipo_display", data.get("tipo_label", ""))
+                if "FIXO" in tipo_upper:
+                    data["tipo_color"] = [0.18, 0.8, 0.44, 1]
+                elif "PROVIS" in tipo_upper:
+                    data["tipo_color"] = [0.95, 0.6, 0.07, 1]
+                else:
+                    data["tipo_color"] = [0.5, 0.5, 0.5, 1]
+            formatted.append(data)
+        self.contratos_detalhes = formatted
+        rv = self.ids.get("contratos_rv")
+        if rv:
+            Clock.schedule_once(lambda dt: setattr(rv, "scroll_y", 1), 0)
 
     def voltar(self):
         App.get_running_app().root.current = "list"

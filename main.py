@@ -5,7 +5,7 @@ import ssl
 import tempfile
 from datetime import date, datetime
 from urllib.error import URLError, HTTPError
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 
 try:
     import certifi
@@ -18,6 +18,8 @@ from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.properties import StringProperty, ListProperty, ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
@@ -29,7 +31,10 @@ from kivy.utils import platform
 BASE_DIR = os.path.dirname(__file__)
 KV_FILE = os.path.join(BASE_DIR, "app.kv")
 DB_NAME = "base.db"
-DB_REMOTE_URL = "https://github.com/Valdeci-cpd/aplicativo-kivy/raw/refs/heads/main/base.db"
+DB_REMOTE_URLS = [
+    "https://raw.githubusercontent.com/Valdeci-cpd/aplicativo-kivy/main/base.db",
+    "https://github.com/Valdeci-cpd/aplicativo-kivy/raw/refs/heads/main/base.db",
+]
 
 Clock.max_iteration = 20
 
@@ -76,11 +81,33 @@ def fetch_url_bytes(url: str, timeout: int = 30) -> bytes:
     context = None
     if certifi:
         context = ssl.create_default_context(cafile=certifi.where())
+    req = Request(url, headers={"User-Agent": "ComodatoViewer/1.0"})
     if context:
-        with urlopen(url, timeout=timeout, context=context) as response:
+        with urlopen(req, timeout=timeout, context=context) as response:
             return response.read()
-    with urlopen(url, timeout=timeout) as response:
+    with urlopen(req, timeout=timeout) as response:
         return response.read()
+
+def download_db_bytes(urls: list, timeout: int = 30):
+    errors = []
+    for url in urls:
+        try:
+            return fetch_url_bytes(url, timeout=timeout), url
+        except (URLError, HTTPError, ssl.SSLError) as exc:
+            errors.append(f"{url} -> {exc}")
+    raise URLError("Falha ao baixar a base.\n" + "\n".join(errors))
+
+def validate_db_file(path: str):
+    try:
+        with sqlite3.connect(path) as con:
+            rows = con.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        tables = {r[0] for r in rows}
+    except sqlite3.DatabaseError as exc:
+        return False, f"Arquivo inválido.\n{exc}"
+    required = {"CLIENTE", "CONTRATO"}
+    if not required.issubset(tables):
+        return False, "A base baixada não contém as tabelas esperadas."
+    return True, ""
 
 def ensure_db_available() -> str:
     app = App.get_running_app()
@@ -334,6 +361,19 @@ class DB:
             })
         return items
 
+class ContractRow(RecycleDataViewBehavior, ButtonBehavior, BoxLayout):
+    codigo_cliente = StringProperty("")
+    nome_fantasia = StringProperty("")
+    razao_social = StringProperty("")
+    cidade = StringProperty("")
+    vendedor = StringProperty("")
+    supervisor = StringProperty("")
+    pasta = StringProperty("")
+    qtd_contratos = StringProperty("")
+    contratos = ListProperty([])
+
+    pass
+
 class CardClientesScreen(Screen):
 
     search_text = StringProperty("")
@@ -375,6 +415,7 @@ class CardClientesScreen(Screen):
 
     def apply_advanced_filter(self, vendedor: str, pastas: list):
         """Aplica os filtros avançados e volta para a lista."""
+        self.search_text = ""
         self.filtro_vendedor = vendedor
         self.filtro_pastas = pastas
         self.refresh()
@@ -645,7 +686,7 @@ class ComodatoApp(App):
         dst_path = os.path.join(dst_dir, DB_NAME)
 
         try:
-            data = fetch_url_bytes(DB_REMOTE_URL, timeout=30)
+            data, source_url = download_db_bytes(DB_REMOTE_URLS, timeout=30)
         except (URLError, HTTPError, ssl.SSLError) as exc:
             return False, f"Não foi possível acessar a internet.\n{exc}"
         except Exception as exc:
@@ -659,7 +700,12 @@ class ComodatoApp(App):
         try:
             with open(tmp_path, "wb") as tmp_file:
                 tmp_file.write(data)
-            shutil.move(tmp_path, dst_path)
+            ok, message = validate_db_file(tmp_path)
+            if not ok:
+                return False, message
+            os.replace(tmp_path, dst_path)
+        except OSError as exc:
+            return False, f"Não foi possível atualizar a base.\n{exc}"
         finally:
             if os.path.exists(tmp_path):
                 try:
@@ -668,7 +714,7 @@ class ComodatoApp(App):
                     pass
 
         self.db = DB(dst_path)
-        return True, "A base de dados foi atualizada com sucesso."
+        return True, f"A base de dados foi atualizada com sucesso.\nFonte: {source_url}"
 
 if __name__ == "__main__":
     ComodatoApp().run()

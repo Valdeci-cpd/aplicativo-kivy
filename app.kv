@@ -40,7 +40,8 @@
             padding: [0, dp(2)]
             BoxLayout:
                 size_hint_y: None
-                height: dp(28)
+                height: self.minimum_height
+                spacing: dp(6)
                 Label:
                     text: "Buscar por cliente, cidade, vendedor ou pasta"
                     font_size: "15sp"
@@ -48,11 +49,13 @@
                     halign: "left"
                     valign: "middle"
                     text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(4)
                 Button:
                     text: "..."
                     size_hint: None, None
                     width: dp(48)
-                    height: dp(28)
+                    height: dp(32)
                     on_release: root.open_actions_menu()
                     background_color: (0.2, 0.5, 0.9, 1)
                     color: (1, 1, 1, 1)
@@ -103,14 +106,14 @@
                 bar_width: dp(3)
 
                 RecycleBoxLayout:
-                    default_size: None, dp(160)
+                    default_size: None, dp(190)
                     default_size_hint: 1, None
                     size_hint_y: None
                     height: self.minimum_height
                     orientation: "vertical"
                     spacing: dp(10)
 
-<ContractRow@ButtonBehavior+BoxLayout>:
+<ContractRow>:
     codigo_cliente: ""
     nome_fantasia: ""
     razao_social: ""
@@ -125,7 +128,7 @@
     size_hint_y: None
     padding: dp(14)
     spacing: dp(10)
-    height: dp(160)
+    height: dp(190)
     canvas.before:
         Color:
             rgba: (0.18, 0.2, 0.26, 1)
@@ -150,42 +153,58 @@
         BoxLayout:
             orientation: "vertical"
             spacing: dp(4)
+            size_hint_y: None
+            height: dp(92)
             Label:
                 text: f"[b]Código:[/b] {root.codigo_cliente}"
                 markup: True
                 halign: "left"
                 valign: "middle"
                 text_size: (self.width, None)
+                shorten: True
+                shorten_from: "right"
+                max_lines: 1
                 size_hint_y: None
-                height: self.texture_size[1] + dp(4)
+                height: dp(20)
             Label:
                 text: f"[b]Nome Fantasia:[/b] {root.nome_fantasia}"
                 markup: True
                 halign: "left"
                 valign: "middle"
                 text_size: (self.width, None)
+                shorten: True
+                shorten_from: "right"
+                max_lines: 1
                 size_hint_y: None
-                height: self.texture_size[1] + dp(4)
+                height: dp(20)
             Label:
                 text: f"[b]Razão Social:[/b] {root.razao_social}"
                 markup: True
                 halign: "left"
                 valign: "middle"
                 text_size: (self.width, None)
+                shorten: True
+                shorten_from: "right"
+                max_lines: 1
                 size_hint_y: None
-                height: self.texture_size[1] + dp(4)
+                height: dp(20)
             Label:
                 text: f"[b]Cidade:[/b] {root.cidade}"
                 markup: True
                 halign: "left"
                 valign: "middle"
                 text_size: (self.width, None)
+                shorten: True
+                shorten_from: "right"
+                max_lines: 1
                 size_hint_y: None
-                height: self.texture_size[1] + dp(4)
+                height: dp(20)
         BoxLayout:
             orientation: "vertical"
             size_hint_x: None
-            width: dp(130)
+            width: dp(110)
+            size_hint_y: None
+            height: dp(88)
             canvas.before:
                 Color:
                     rgba: (0.27, 0.52, 0.95, 1)
@@ -213,28 +232,43 @@
                 text_size: self.size
 
     BoxLayout:
-        orientation: "horizontal"
-        spacing: dp(8)
+        orientation: "vertical"
+        spacing: dp(2)
         size_hint_y: None
-        height: dp(26)
+        height: dp(60)
         Label:
             text: f"[b]Supervisor:[/b] {root.supervisor}"
             markup: True
             halign: "left"
             valign: "middle"
             text_size: (self.width, None)
+            shorten: True
+            shorten_from: "right"
+            max_lines: 1
+            size_hint_y: None
+            height: dp(18)
         Label:
             text: f"[b]Vendedor:[/b] {root.vendedor}"
             markup: True
             halign: "left"
             valign: "middle"
             text_size: (self.width, None)
+            shorten: True
+            shorten_from: "right"
+            max_lines: 1
+            size_hint_y: None
+            height: dp(18)
         Label:
             text: f"[b]Pasta:[/b] {root.pasta}"
             markup: True
             halign: "left"
             valign: "middle"
             text_size: (self.width, None)
+            shorten: True
+            shorten_from: "right"
+            max_lines: 1
+            size_hint_y: None
+            height: dp(18)
 
 <ContractDetailScreen>:
     name: "detail"
@@ -563,7 +597,7 @@
             size_hint_y: None
             height: dp(30)
             Label:
-                text: "Dados do Contrato"
+                text: "Dados do Cliente"
                 font_size: "15sp"
                 color: (1, 1, 1, 0.7)
                 halign: "left"
@@ -613,7 +647,23 @@
                     size_hint_y: None
                     height: self.texture_size[1] + dp(6)
                 Label:
-                    text: f"[b]Emissão:[/b] {root.emissao} [b]Vencimento:[/b] {root.vencimento} [b]Tipo:[/b] {root.tipo}"
+                    text: f"[b]Emissão:[/b] {root.emissao}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Vencimento:[/b] {root.vencimento}"
+                    markup: True
+                    halign: "left"
+                    valign: "middle"
+                    text_size: (self.width, None)
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(6)
+                Label:
+                    text: f"[b]Tipo:[/b] {root.tipo}"
                     markup: True
                     halign: "left"
                     valign: "middle"
@@ -667,7 +717,7 @@
 
     orientation: "vertical"
     size_hint_y: None
-    height: dp(110)
+    height: self.minimum_height
     padding: dp(14)
     spacing: dp(8)
     canvas.before:

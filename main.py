@@ -1,10 +1,16 @@
 import os
 import shutil
 import sqlite3
+import ssl
 import tempfile
 from datetime import date, datetime
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
+
+try:
+    import certifi
+except Exception:
+    certifi = None
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -20,9 +26,10 @@ from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
 from kivy.utils import platform
 
-KV_FILE = "app.kv"
+BASE_DIR = os.path.dirname(__file__)
+KV_FILE = os.path.join(BASE_DIR, "app.kv")
 DB_NAME = "base.db"
-DB_REMOTE_URL = "https://github.com/Valdeci-cpd/Contratos/raw/refs/heads/main/base.db"
+DB_REMOTE_URL = "https://github.com/Valdeci-cpd/aplicativo-kivy/raw/refs/heads/main/base.db"
 
 Clock.max_iteration = 20
 
@@ -65,9 +72,19 @@ def normalize_tipo(value: str) -> str:
         return "PROVISÓRIO"
     return tipo_upper
 
+def fetch_url_bytes(url: str, timeout: int = 30) -> bytes:
+    context = None
+    if certifi:
+        context = ssl.create_default_context(cafile=certifi.where())
+    if context:
+        with urlopen(url, timeout=timeout, context=context) as response:
+            return response.read()
+    with urlopen(url, timeout=timeout) as response:
+        return response.read()
+
 def ensure_db_available() -> str:
     app = App.get_running_app()
-    src = os.path.join(os.path.dirname(__file__), DB_NAME)
+    src = os.path.join(BASE_DIR, DB_NAME)
 
     if platform == "android":
         dst = os.path.join(app.user_data_dir, DB_NAME)
@@ -628,9 +645,8 @@ class ComodatoApp(App):
         dst_path = os.path.join(dst_dir, DB_NAME)
 
         try:
-            with urlopen(DB_REMOTE_URL, timeout=30) as response:
-                data = response.read()
-        except (URLError, HTTPError) as exc:
+            data = fetch_url_bytes(DB_REMOTE_URL, timeout=30)
+        except (URLError, HTTPError, ssl.SSLError) as exc:
             return False, f"Não foi possível acessar a internet.\n{exc}"
         except Exception as exc:
             return False, f"Erro inesperado ao baixar a base.\n{exc}"
@@ -638,7 +654,7 @@ class ComodatoApp(App):
         if not data:
             return False, "O download retornou um arquivo vazio."
 
-        fd, tmp_path = tempfile.mkstemp(suffix=".db")
+        fd, tmp_path = tempfile.mkstemp(suffix=".db", dir=dst_dir)
         os.close(fd)
         try:
             with open(tmp_path, "wb") as tmp_file:
